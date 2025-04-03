@@ -27,7 +27,7 @@ function generateOriginalPDF(fullName, position, conditions, attachments) {
     const month = String(currentDate.getMonth() + 1).padStart(2, '0');
     const year = currentDate.getFullYear();
     const formattedDate = `${day}.${month}.${year}г.`;
-    const shortDate = `«__» _____________ ${year}г.`;
+    const shortDate = `«__» _____________ ____г.`;
     
     const commissionMembers = [
         { name: '_____________ /', date: shortDate },
