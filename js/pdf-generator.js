@@ -10,7 +10,7 @@ pdfMake.fonts = {
 
 // Проверка мобильного устройства
 function isMobileDevice() {
-    return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 }
 
 // Форматирование суммы с пробелами
@@ -46,16 +46,34 @@ function generateOriginalPDF(fullName, position, conditions, attachments) {
         return sum + (parseFloat(cleanAmount) || 0);
     }, 0);
     
-    const tableBody = [
-        [
-            { text: 'Ф.И.О. сотрудника', style: 'tableHeader' },
-            { text: fullName, style: 'tableCell', fontSize: 10 }
-        ],
-        [
-            { text: 'Должность работника', style: 'tableHeader' },
-            { text: position, style: 'tableCell', fontSize: 10 }
-        ]
-    ];
+const tableBody = [
+    [
+        { 
+            text: 'Ф.И.О. сотрудника', 
+            style: 'tableHeader',
+            pageBreak: 'avoid' // Добавлено для предотвращения переноса
+        },
+        { 
+            text: fullName, 
+            style: 'tableCell', 
+            fontSize: 10,
+            pageBreak: 'avoid' // Добавлено для предотвращения переноса
+        }
+    ],
+    [
+        { 
+            text: 'Должность работника', 
+            style: 'tableHeader',
+            pageBreak: 'avoid' // Добавлено для предотвращения переноса
+        },
+        { 
+            text: position, 
+            style: 'tableCell', 
+            fontSize: 10,
+            pageBreak: 'avoid' // Добавлено для предотвращения переноса
+        }
+    ]
+];
 
     if (conditions.length > 0) {
         conditions.forEach((condition, index) => {
@@ -187,10 +205,13 @@ function generateOriginalPDF(fullName, position, conditions, attachments) {
         }
     };
     
-    try {
+ try {
         const pdfDoc = pdfMake.createPdf(docDefinition);
         if (isMobileDevice()) {
-            pdfDoc.download('Информационный_лист.pdf');
+            // Для мобильных - показываем уведомление перед скачиванием
+            if (confirm('Подготовка PDF завершена. Нажмите OK для скачивания.')) {
+                pdfDoc.download('Информационный_лист.pdf');
+            }
         } else {
             pdfDoc.open();
         }
@@ -200,9 +221,16 @@ function generateOriginalPDF(fullName, position, conditions, attachments) {
     }
 }
 
-// Обработчик для генерации PDF
+// Обработчик для генерации PDF с защитой от двойного нажатия
+let isGenerating = false;
 document.getElementById('generate-pdf').addEventListener('click', function() {
-    if (!checkPDFMakeLoaded()) return;
+    if (isGenerating) return;
+    isGenerating = true;
+    
+    if (!checkPDFMakeLoaded()) {
+        isGenerating = false;
+        return;
+    }
     
     // Проверка всех полей
     const textValid = validateAllTextFields();
@@ -214,6 +242,7 @@ document.getElementById('generate-pdf').addEventListener('click', function() {
             document.getElementById('position-error').style.display = 'block';
             document.getElementById('position').classList.add('error');
         }
+        isGenerating = false;
         return;
     }
     
@@ -241,5 +270,14 @@ document.getElementById('generate-pdf').addEventListener('click', function() {
         if (item.value) attachments.push(item.value);
     });
     
-    generateOriginalPDF(fullName, position, conditions, attachments);
+    // Добавляем задержку для мобильных устройств
+    if (isMobileDevice()) {
+        setTimeout(() => {
+            generateOriginalPDF(fullName, position, conditions, attachments);
+            isGenerating = false;
+        }, 300);
+    } else {
+        generateOriginalPDF(fullName, position, conditions, attachments);
+        isGenerating = false;
+    }
 });

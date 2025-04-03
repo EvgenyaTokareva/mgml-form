@@ -203,6 +203,25 @@ input[type="text"]:focus, select:focus, textarea:focus {
         flex: 1;
         min-width: 200px;
     }
+	
+	    /* Убираем анимации на мобильных */
+    .btn {
+        transition: none !important;
+    }
+    
+    /* Улучшаем отображение кнопки генерации */
+    .btn-generate {
+        padding: 15px;
+        font-size: 18px;
+        -webkit-tap-highlight-color: transparent;
+    }
+    
+    /* Улучшаем отзывчивость полей ввода */
+    input[type="text"], select, textarea {
+        font-size: 16px;
+        padding: 12px;
+    }
+	
 }
 @media (max-width: 480px) {
     .container {
@@ -218,4 +237,16 @@ input[type="text"]:focus, select:focus, textarea:focus {
         font-size: 18px;
     }
     
+	 .condition-amount {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        font-size: 16px;
+    }
+    
+    input[type="text"].condition-amount {
+        font-size: 18px;
+        padding: 12px;
+    }
 }

@@ -73,17 +73,12 @@ function validateConditions() {
         const note = item.querySelector('.condition-note');
         const amount = item.querySelector('.condition-amount');
         
+        // Сбрасываем ошибки
         point.classList.remove('error');
         note.classList.remove('error');
         amount.classList.remove('error');
-    });
-    
-    // Затем проверим на ошибки
-    conditionItems.forEach(item => {
-        const point = item.querySelector('.condition-point');
-        const note = item.querySelector('.condition-note');
-        const amount = item.querySelector('.condition-amount');
         
+        // Проверяем заполненность
         if (!point.value || !note.value || !amount.value) {
             hasEmptyFields = true;
             allValid = false;
@@ -92,6 +87,7 @@ function validateConditions() {
             if (!amount.value) amount.classList.add('error');
         }
         
+        // Проверяем корректность суммы
         if (amount.value && !validateNumberInput(amount)) {
             hasInvalidAmounts = true;
             allValid = false;
@@ -142,23 +138,39 @@ function formatNumberInput(input) {
     }
     
     input.value = value;
-    input.setSelectionRange(cursorPosition, cursorPosition);
+    
+    // Восстанавливаем позицию курсора с учетом добавленных пробелов
+    const diff = input.value.length - value.length;
+    if (cursorPosition > 0) {
+        input.setSelectionRange(cursorPosition + diff, cursorPosition + diff);
+    }
 }
 
-// Инициализация обработчиков событий
+// Инициализация обработчиков событий с валидацией в реальном времени
 document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('lastName').addEventListener('blur', function() {
+    // Валидация при вводе
+    document.getElementById('lastName').addEventListener('input', function() {
         validateTextInput(this, 'lastName-error');
     });
-    document.getElementById('firstName').addEventListener('blur', function() {
+    document.getElementById('firstName').addEventListener('input', function() {
         validateTextInput(this, 'firstName-error');
     });
-    document.getElementById('middleName').addEventListener('blur', function() {
+    document.getElementById('middleName').addEventListener('input', function() {
         validateTextInput(this, 'middleName-error');
     });
 
+    // Валидация полей условий
+    document.addEventListener('input', function(e) {
+        if (e.target.classList.contains('condition-point') || 
+            e.target.classList.contains('condition-note') ||
+            e.target.classList.contains('condition-amount')) {
+            validateConditions();
+        }
+    });
+    
+    // Форматирование суммы при вводе
     document.querySelectorAll('.condition-amount').forEach(input => {
-        input.addEventListener('blur', function() {
+        input.addEventListener('input', function() {
             formatNumberInput(this);
             validateNumberInput(this);
         });

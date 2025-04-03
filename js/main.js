@@ -83,41 +83,40 @@ function addNewCondition() {
         <input type="text" placeholder="Размер выплаты" class="condition-amount" required>
         <button type="button" class="btn btn-danger remove-condition">×</button>
     `;
-   container.appendChild(newRow);
+    container.appendChild(newRow);
 
-    // Добавляем обработчики blur для новых полей
+    // Добавляем обработчики для новых полей
     const pointSelect = newRow.querySelector('.condition-point');
     const noteTextarea = newRow.querySelector('.condition-note');
     const amountInput = newRow.querySelector('.condition-amount');
     
-    pointSelect.addEventListener('blur', function() {
-        if (!this.value) {
-            this.classList.add('error');
-        } else {
-            this.classList.remove('error');
-        }
+    // Валидация при изменении
+    pointSelect.addEventListener('input', function() {
+        validateConditions();
     });
     
-    noteTextarea.addEventListener('blur', function() {
-        if (!this.value) {
-            this.classList.add('error');
-        } else {
-            this.classList.remove('error');
-        }
+    noteTextarea.addEventListener('input', function() {
+        validateConditions();
     });
     
-    amountInput.addEventListener('blur', function() {
+    amountInput.addEventListener('input', function() {
         formatNumberInput(this);
-        validateNumberInput(this);
+        validateConditions();
     });
     
     newRow.querySelector('.remove-condition').addEventListener('click', function() {
         if (container.children.length > 1) {
             container.removeChild(newRow);
+            validateConditions();
         } else {
             alert('Должно быть хотя бы одно условие');
         }
     });
+    
+    // Фокусируемся на первом поле нового условия
+    setTimeout(() => {
+        pointSelect.focus();
+    }, 100);
 }
 
 function addNewAttachment() {
