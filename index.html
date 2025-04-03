@@ -9,6 +9,7 @@
 </head>
 <body>
     <div class="container">
+        <!-- Шапка с логотипом -->
         <div class="header-container">
             <div class="header-text">
                 <h1>Информация для установления стимулирующих выплат</h1>
@@ -16,6 +17,7 @@
             <img src="./image/logo.jpg" alt="Логотип" class="logo">
         </div>
         
+        <!-- Поля для ввода ФИО -->
         <div class="form-group">
             <label for="lastName" class="required">Фамилия</label>
             <input type="text" id="lastName" required>
@@ -34,6 +36,7 @@
             <div id="middleName-error" class="error-message">Отчество должно содержать только буквы</div>
         </div>
         
+        <!-- Выбор должности -->
         <div class="form-group">
             <label for="position" class="required">Должность</label>
             <select id="position" required>
@@ -52,6 +55,7 @@
             <div id="position-error" class="error-message">Пожалуйста, выберите должность</div>
         </div>
         
+         <!-- Секция с условиями выплат -->
         <div class="section-title">Согласно Приложению 3:</div>
         
         <div id="conditions-container">
@@ -118,6 +122,7 @@
         <button type="button" class="btn" id="add-condition-btn">+ Добавить условие</button>
         <div class="note">Добавьте все пункты условий получения выплаты</div>
         
+       <!-- Секция с приложениями -->
         <div class="section-title">Перечень приложений к представлению:</div>
         
         <div id="attachments-container">
@@ -129,9 +134,11 @@
         <button type="button" class="btn" id="add-attachment-btn">+ Добавить приложение</button>
         <div class="note">Добавьте приложения, если они имеются</div>
         
+        <!-- Кнопка генерации PDF -->
         <button type="button" class="btn btn-generate" id="generate-pdf">Сформировать информационный лист (PDF)</button>
     </div>
 
+    <!-- Подключение библиотек и скриптов -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
     <script src="js/validation.js"></script>
