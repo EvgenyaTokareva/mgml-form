@@ -83,16 +83,40 @@ function addNewCondition() {
         <input type="text" placeholder="Размер выплаты" class="condition-amount" required>
         <button type="button" class="btn btn-danger remove-condition">×</button>
     `;
-    container.appendChild(newRow);
+   container.appendChild(newRow);
+
+    // Добавляем обработчики blur для новых полей
+    const pointSelect = newRow.querySelector('.condition-point');
+    const noteTextarea = newRow.querySelector('.condition-note');
+    const amountInput = newRow.querySelector('.condition-amount');
     
-    // Валидация числового поля
-    newRow.querySelector('.condition-amount').addEventListener('input', function() {
+    pointSelect.addEventListener('blur', function() {
+        if (!this.value) {
+            this.classList.add('error');
+        } else {
+            this.classList.remove('error');
+        }
+    });
+    
+    noteTextarea.addEventListener('blur', function() {
+        if (!this.value) {
+            this.classList.add('error');
+        } else {
+            this.classList.remove('error');
+        }
+    });
+    
+    amountInput.addEventListener('blur', function() {
+        formatNumberInput(this);
         validateNumberInput(this);
     });
     
-    // Удаление строки
     newRow.querySelector('.remove-condition').addEventListener('click', function() {
-        container.removeChild(newRow);
+        if (container.children.length > 1) {
+            container.removeChild(newRow);
+        } else {
+            alert('Должно быть хотя бы одно условие');
+        }
     });
 }
 
@@ -106,22 +130,22 @@ function addNewAttachment() {
     `;
     container.appendChild(newRow);
     
-    // Удаление строки
     newRow.querySelector('.remove-attachment').addEventListener('click', function() {
-        container.removeChild(newRow);
+        if (container.children.length > 1) {
+            container.removeChild(newRow);
+        }
     });
 }
 
 function initializeFirstCondition() {
-    // Добавляем обработчики для первого условия
     const firstAmountInput = document.querySelector('.condition-amount');
     if (firstAmountInput) {
-        firstAmountInput.addEventListener('input', function() {
+        firstAmountInput.addEventListener('blur', function() {
+            formatNumberInput(this);
             validateNumberInput(this);
         });
     }
 
-    // Добавляем обработчик для первой кнопки удаления условия
     const firstRemoveBtn = document.querySelector('.remove-condition');
     if (firstRemoveBtn) {
         firstRemoveBtn.addEventListener('click', function() {
@@ -134,7 +158,6 @@ function initializeFirstCondition() {
         });
     }
 
-    // Добавляем обработчик для первой кнопки удаления приложения
     const firstAttachmentRemoveBtn = document.querySelector('.remove-attachment');
     if (firstAttachmentRemoveBtn) {
         firstAttachmentRemoveBtn.addEventListener('click', function() {

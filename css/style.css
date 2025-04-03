@@ -4,7 +4,7 @@ body {
     margin: 0;
     padding: 20px;
     color: #333;
-    background-color: #F1F5F9
+    background-color: #F1F5F9;
 }
 
 .container {
@@ -172,7 +172,6 @@ input[type="text"]:focus, select:focus, textarea:focus {
     margin-top: 5px;
 }
 
-/* Медиа-запросы для адаптивности */
 @media (min-width: 768px) {
     .header-container {
         flex-direction: row;
@@ -204,4 +203,19 @@ input[type="text"]:focus, select:focus, textarea:focus {
         flex: 1;
         min-width: 200px;
     }
+}
+@media (max-width: 480px) {
+    .container {
+        padding: 15px;
+    }
+    
+    input[type="text"], select, textarea {
+        font-size: 16px; /* Увеличиваем размер шрифта для мобильных */
+    }
+    
+    .btn-generate {
+        padding: 15px 25px;
+        font-size: 18px;
+    }
+    
 }
