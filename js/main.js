@@ -1,33 +1,43 @@
+/**
+ * Основной файл приложения - обработка событий и управление интерфейсом
+ */
+
+// Инициализация приложения после загрузки DOM
 document.addEventListener('DOMContentLoaded', function() {
-    // Обработчик для выбора должности
+    // Обработчик изменения должности
     document.getElementById('position').addEventListener('change', function() {
         const otherPositionField = document.getElementById('otherPosition');
+        // Показываем поле для ввода другой должности, если выбрано "Другая должность"
         if (this.value === 'other') {
             otherPositionField.style.display = 'block';
         } else {
             otherPositionField.style.display = 'none';
             otherPositionField.value = '';
         }
+        // Сбрасываем ошибки
         this.classList.remove('error');
         document.getElementById('position-error').style.display = 'none';
     });
 
-    // Добавление нового условия выплаты
+    // Обработчики кнопок добавления
     document.getElementById('add-condition-btn').addEventListener('click', addNewCondition);
-
-    // Добавление нового приложения
     document.getElementById('add-attachment-btn').addEventListener('click', addNewAttachment);
 
-    // Инициализация первого условия
+    // Инициализация первого блока условий
     initializeFirstCondition();
 });
 
+/**
+ * Добавляет новое условие выплаты
+ */
 function addNewCondition() {
     const container = document.getElementById('conditions-container');
     const newRow = document.createElement('div');
     newRow.className = 'condition-item';
+    
+    // HTML структура нового условия
     newRow.innerHTML = `
-        <select class="condition-point" required>
+              <select class="condition-point" required>
             <option value="">-- Выберите пункт условия --</option>
             <option value="1. Организатор (координатор) мероприятий.">1. Организатор (координатор) мероприятий.</option>
             <option value="2. Результативное участие обучающихся в очных конференциях НОУ, интеллектуальных, творческих играх, конкурсов, проектах. Наличие победителя/призера.">2. Результ. участие обучающихся в очных конф. НОУ, интеллект., творч. играх, конкурсах, проектах. Наличие победителя/призера.</option>
@@ -85,25 +95,26 @@ function addNewCondition() {
     `;
     container.appendChild(newRow);
 
-    // Добавляем обработчики для новых полей
+    // Получаем элементы нового условия
     const pointSelect = newRow.querySelector('.condition-point');
     const noteTextarea = newRow.querySelector('.condition-note');
     const amountInput = newRow.querySelector('.condition-amount');
     
-    // Валидация при изменении
-    pointSelect.addEventListener('input', function() {
+    // Добавляем обработчики событий
+    pointSelect.addEventListener('blur', function() {
         validateConditions();
     });
     
-    noteTextarea.addEventListener('input', function() {
+    noteTextarea.addEventListener('blur', function() {
         validateConditions();
     });
     
-    amountInput.addEventListener('input', function() {
+    amountInput.addEventListener('blur', function() {
         formatNumberInput(this);
         validateConditions();
     });
     
+    // Обработчик удаления условия
     newRow.querySelector('.remove-condition').addEventListener('click', function() {
         if (container.children.length > 1) {
             container.removeChild(newRow);
@@ -113,12 +124,15 @@ function addNewCondition() {
         }
     });
     
-    // Фокусируемся на первом поле нового условия
+    // Фокусировка на новом поле
     setTimeout(() => {
         pointSelect.focus();
     }, 100);
 }
 
+/**
+ * Добавляет новое приложение
+ */
 function addNewAttachment() {
     const container = document.getElementById('attachments-container');
     const newRow = document.createElement('div');
@@ -136,12 +150,16 @@ function addNewAttachment() {
     });
 }
 
+/**
+ * Инициализирует обработчики для первого блока условий
+ */
 function initializeFirstCondition() {
     const firstAmountInput = document.querySelector('.condition-amount');
     if (firstAmountInput) {
         firstAmountInput.addEventListener('blur', function() {
             formatNumberInput(this);
             validateNumberInput(this);
+            validateConditions(); // Добавьте эту строку
         });
     }
 
