@@ -1,3 +1,7 @@
+/**
+ * Генерация PDF документа
+ */
+
 // Установка шрифтов для PDFMake
 pdfMake.fonts = {
     Roboto: {
@@ -8,20 +12,34 @@ pdfMake.fonts = {
     }
 };
 
-// Проверка мобильного устройства
+/**
+ * Проверяет, является ли устройство мобильным
+ * @returns {boolean} Результат проверки
+ */
 function isMobileDevice() {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 }
 
-// Форматирование суммы с пробелами
+/**
+ * Форматирует сумму с пробелами между разрядами
+ * @param {number} amount - Сумма
+ * @returns {string} Отформатированная строка с суммой
+ */
 function formatCurrency(amount) {
     const parts = amount.toFixed(2).split('.');
     parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
     return parts.join('.') + ' рублей';
 }
 
-// Функция генерации PDF
+/**
+ * Генерирует PDF документ
+ * @param {string} fullName - Полное имя сотрудника
+ * @param {string} position - Должность
+ * @param {Array} conditions - Массив условий выплат
+ * @param {Array} attachments - Массив приложений
+ */
 function generateOriginalPDF(fullName, position, conditions, attachments) {
+    // Форматирование даты
     const currentDate = new Date();
     const day = String(currentDate.getDate()).padStart(2, '0');
     const month = String(currentDate.getMonth() + 1).padStart(2, '0');
@@ -29,12 +47,14 @@ function generateOriginalPDF(fullName, position, conditions, attachments) {
     const formattedDate = `${day}.${month}.${year}г.`;
     const shortDate = `«__» _____________ 20__г.`;
     
+    // Данные членов комиссии
     const commissionMembers = [
         { name: '_____________ /', date: shortDate },
         { name: '_____________ /', date: shortDate },
         { name: '_____________ /', date: shortDate }
     ];
     
+    // Расчет общей суммы выплат
     const totalAmount = conditions.reduce((sum, condition) => {
         let cleanAmount = condition.amount.replace(/\s/g, '').replace(/,/g, '.').replace(/\.(?=.*\.)/g, '');
         if (cleanAmount.includes('.')) {
@@ -46,35 +66,37 @@ function generateOriginalPDF(fullName, position, conditions, attachments) {
         return sum + (parseFloat(cleanAmount) || 0);
     }, 0);
     
-const tableBody = [
-    [
-        { 
-            text: 'Ф.И.О. сотрудника', 
-            style: 'tableHeader',
-            pageBreak: 'avoid' // Добавлено для предотвращения переноса
-        },
-        { 
-            text: fullName, 
-            style: 'tableCell', 
-            fontSize: 10,
-            pageBreak: 'avoid' // Добавлено для предотвращения переноса
-        }
-    ],
-    [
-        { 
-            text: 'Должность работника', 
-            style: 'tableHeader',
-            pageBreak: 'avoid' // Добавлено для предотвращения переноса
-        },
-        { 
-            text: position, 
-            style: 'tableCell', 
-            fontSize: 10,
-            pageBreak: 'avoid' // Добавлено для предотвращения переноса
-        }
-    ]
-];
+     // Формирование тела таблицы
+    const tableBody = [
+        [
+            { 
+                text: 'Ф.И.О. сотрудника', 
+                style: 'tableHeader',
+                pageBreak: 'avoid'
+            },
+            { 
+                text: fullName, 
+                style: 'tableCell', 
+                fontSize: 10,
+                pageBreak: 'avoid'
+            }
+        ],
+        [
+            { 
+                text: 'Должность работника', 
+                style: 'tableHeader',
+                pageBreak: 'avoid'
+            },
+            { 
+                text: position, 
+                style: 'tableCell', 
+                fontSize: 10,
+                pageBreak: 'avoid'
+            }
+        ]
+    ];
 
+    // Добавление условий в таблицу
     if (conditions.length > 0) {
         conditions.forEach((condition, index) => {
             tableBody.push([
@@ -82,12 +104,13 @@ const tableBody = [
                     text: index === 0 ? 'Приложение №3' : '', 
                     style: 'tableHeader',
                     rowSpan: index === 0 ? conditions.length : undefined,
-                    fontSize: 10
+                    fontSize: 10,
+                    pageBreak: 'avoid'
                 },
                 { 
                     stack: [
                         { 
-                            text: `${condition.point}, \n ${condition.note} — ${condition.amount} рублей`,
+                            text: `${condition.point}, \n${condition.note} — ${condition.amount} рублей`,
                             margin: [0, 0, 0, 2],
                             fontSize: 10
                         },
@@ -97,6 +120,8 @@ const tableBody = [
         });
     }
 
+
+   // Добавление приложений в таблицу
     if (attachments.length > 0) {
         attachments.forEach((attachment, index) => {
             tableBody.push([
@@ -104,7 +129,8 @@ const tableBody = [
                     text: index === 0 ? 'Перечень приложений к представлению' : '', 
                     style: 'tableHeader',
                     rowSpan: index === 0 ? attachments.length : undefined,
-                    fontSize: 10
+                    fontSize: 10,
+                    pageBreak: 'avoid'
                 },
                 { 
                     text: attachment,
@@ -115,24 +141,46 @@ const tableBody = [
         });
     }
 
+    // Добавление остальных полей в таблицу
     tableBody.push(
         [
-            { text: 'Дата предъявления информации. Подпись', style: 'tableHeader', fontSize: 10 },
-            { text: formattedDate, style: 'tableCell', fontSize: 10 }
+            { 
+                text: 'Дата предъявления информации. Подпись', 
+                style: 'tableHeader', 
+                fontSize: 10,
+                pageBreak: 'avoid'
+            },
+            { 
+                text: formattedDate, 
+                style: 'tableCell', 
+                fontSize: 10,
+                pageBreak: 'avoid'
+            }
         ],
         [
-            { text: 'Рекомендовать к оплате:', style: 'tableHeader', fontSize: 10 },
-            { text: formatCurrency(totalAmount), style: 'tableCell', fontSize: 10 }
+            { 
+                text: 'Рекомендовать к оплате:', 
+                style: 'tableHeader', 
+                fontSize: 10,
+                pageBreak: 'avoid'
+            },
+            { 
+                text: formatCurrency(totalAmount), 
+                style: 'tableCell', 
+                fontSize: 10,
+                pageBreak: 'avoid'
+            }
         ]
     );
-
+ // Добавление членов комиссии в таблицу
     commissionMembers.forEach((member, index) => {
         tableBody.push([
             { 
                 text: index === 0 ? 'Члены комиссии\n(подпись/расшифровка/дата)' : '', 
                 style: 'tableHeader',
                 rowSpan: index === 0 ? commissionMembers.length : undefined,
-                fontSize: 10
+                fontSize: 10,
+                pageBreak: 'avoid'
             },
             { 
                 text: `${member.name}${' '.repeat(25)}${member.date}`,
@@ -141,7 +189,7 @@ const tableBody = [
             }
         ]);
     });
-
+ // Содержимое PDF документа
     const content = [
         { 
             text: 'ИНФОРМАЦИОННЫЙ ЛИСТ', 
@@ -159,8 +207,8 @@ const tableBody = [
             table: {
                 widths: ['30%', '70%'],
                 body: tableBody,
-                headerRows: 1,
-                dontBreakRows: false,
+                headerRows: 0, // Отключили повтор заголовков
+                dontBreakRows: true, // Запретили разрыв строк
                 keepWithHeaderRows: 0
             },
             layout: {
@@ -170,7 +218,8 @@ const tableBody = [
                 vLineColor: () => 'black',
                 paddingTop: () => 5,
                 paddingBottom: () => 5
-            }
+            },
+            pageBreak: 'auto'
         },
         { 
             text: [
@@ -188,10 +237,10 @@ const tableBody = [
             margin: [0, 0, 0, 0]
         }
     ];
-    
+    // Определение документа PDF
     const docDefinition = {
         pageSize: 'A4',
-        pageMargins: [40, 40, 40, 40],
+        pageMargins: [30, 30, 30, 30], // Уменьшенные отступы
         content: content,
         styles: {
             header: { fontSize: 16, margin: [0, 0, 0, 5] },
@@ -201,14 +250,14 @@ const tableBody = [
         },
         defaultStyle: {
             font: 'Roboto',
-            fontSize: 10
+            fontSize: 10,
+            lineHeight: 1.1
         }
     };
-    
- try {
+    // Генерация и вывод PDF
+    try {
         const pdfDoc = pdfMake.createPdf(docDefinition);
         if (isMobileDevice()) {
-            // Для мобильных - показываем уведомление перед скачиванием
             if (confirm('Подготовка PDF завершена. Нажмите OK для скачивания.')) {
                 pdfDoc.download('Информационный_лист.pdf');
             }
@@ -226,7 +275,7 @@ let isGenerating = false;
 document.getElementById('generate-pdf').addEventListener('click', function() {
     if (isGenerating) return;
     isGenerating = true;
-    
+     // Проверка загрузки библиотек PDF
     if (!checkPDFMakeLoaded()) {
         isGenerating = false;
         return;
@@ -246,7 +295,7 @@ document.getElementById('generate-pdf').addEventListener('click', function() {
         return;
     }
     
-    // Сбор данных
+    // Сбор данных из формы
     const lastName = document.getElementById('lastName').value;
     const firstName = document.getElementById('firstName').value;
     const middleName = document.getElementById('middleName').value;
@@ -255,7 +304,7 @@ document.getElementById('generate-pdf').addEventListener('click', function() {
         : document.getElementById('position').value;
     
     const fullName = `${lastName} ${firstName} ${middleName}`.trim();
-    
+    // Сбор условий
     const conditions = [];
     document.querySelectorAll('.condition-item').forEach(item => {
         conditions.push({
@@ -264,13 +313,13 @@ document.getElementById('generate-pdf').addEventListener('click', function() {
             note: item.querySelector('.condition-note').value
         });
     });
-    
+    // Сбор приложений
     const attachments = [];
     document.querySelectorAll('.attachment-name').forEach(item => {
         if (item.value) attachments.push(item.value);
     });
     
-    // Добавляем задержку для мобильных устройств
+    // Генерация PDF с учетом типа устройства
     if (isMobileDevice()) {
         setTimeout(() => {
             generateOriginalPDF(fullName, position, conditions, attachments);
