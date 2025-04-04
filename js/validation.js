@@ -1,12 +1,27 @@
-// Проверка на текстовое значение (без цифр)
+/**
+ * Функции валидации формы
+ */
+
+/**
+ * Проверяет текстовое поле на наличие только букв
+ * @param {HTMLInputElement} input - Поле ввода
+ * @param {string} errorElementId - ID элемента для отображения ошибки
+ * @returns {boolean} Валидность поля
+ */
 function validateTextInput(input, errorElementId) {
     const value = input.value;
     const errorElement = document.getElementById(errorElementId);
+    
+    // Если поле пустое, не проверяем (это делается в validateAllTextFields)
+    if (!value) return true;
+    
+    // Регулярное выражение: только буквы, пробелы и дефисы
     const regex = /^[a-zA-Zа-яА-ЯёЁ\s\-]+$/;
     
-    if (value && !regex.test(value)) {
+    if (!regex.test(value)) {
         input.classList.add('error');
         errorElement.style.display = 'block';
+        errorElement.textContent = 'Поле должно содержать только буквы';
         return false;
     } else {
         input.classList.remove('error');
@@ -15,19 +30,49 @@ function validateTextInput(input, errorElementId) {
     }
 }
 
-// Проверка всех текстовых полей
+/**
+ * Проверяет все текстовые поля формы
+ * @returns {boolean} Валидность всех полей
+ */
 function validateAllTextFields() {
     let isValid = true;
     
-    if (!validateTextInput(document.getElementById('lastName'), 'lastName-error')) isValid = false;
-    if (!validateTextInput(document.getElementById('firstName'), 'firstName-error')) isValid = false;
-    if (document.getElementById('middleName').value && 
-        !validateTextInput(document.getElementById('middleName'), 'middleName-error')) isValid = false;
+    // Проверка фамилии
+    const lastName = document.getElementById('lastName');
+    if (!lastName.value) {
+        lastName.classList.add('error');
+        document.getElementById('lastName-error').style.display = 'block';
+        document.getElementById('lastName-error').textContent = 'Поле обязательно для заполнения';
+        isValid = false;
+    } else if (!validateTextInput(lastName, 'lastName-error')) {
+        isValid = false;
+    }
+    
+    // Проверка имени
+    const firstName = document.getElementById('firstName');
+    if (!firstName.value) {
+        firstName.classList.add('error');
+        document.getElementById('firstName-error').style.display = 'block';
+        document.getElementById('firstName-error').textContent = 'Поле обязательно для заполнения';
+        isValid = false;
+    } else if (!validateTextInput(firstName, 'firstName-error')) {
+        isValid = false;
+    }
+    
+    // Проверка отчества (необязательное поле)
+    const middleName = document.getElementById('middleName');
+    if (middleName.value && !validateTextInput(middleName, 'middleName-error')) {
+        isValid = false;
+    }
     
     return isValid;
 }
 
-// Валидация числового ввода
+/**
+ * Проверяет поле с суммой на корректность
+ * @param {HTMLInputElement} input - Поле ввода суммы
+ * @returns {boolean} Валидность поля
+ */
 function validateNumberInput(input) {
     const value = input.value;
     const errorElement = document.getElementById('amount-error');
@@ -37,6 +82,7 @@ function validateNumberInput(input) {
         return false;
     }
     
+    // Регулярное выражение для суммы (с пробелами и десятичной частью)
     const isValid = /^[0-9]{1,3}(\s?[0-9]{3})*([,.]?[0-9]{0,2})?$/.test(value);
     
     if (!isValid) {
@@ -51,7 +97,10 @@ function validateNumberInput(input) {
     return true;
 }
 
-// Проверка всех условий
+/**
+ * Проверяет все условия на корректность заполнения
+ * @returns {boolean} Валидность всех условий
+ */
 function validateConditions() {
     const conditionItems = document.querySelectorAll('.condition-item');
     if (conditionItems.length === 0) {
@@ -64,7 +113,7 @@ function validateConditions() {
     let hasInvalidAmounts = false;
     let allValid = true;
     
-    // Сначала сбросим все ошибки
+    // Сбрасываем ошибки
     document.getElementById('condition-error').style.display = 'none';
     document.getElementById('amount-error').style.display = 'none';
     
@@ -73,12 +122,12 @@ function validateConditions() {
         const note = item.querySelector('.condition-note');
         const amount = item.querySelector('.condition-amount');
         
-        // Сбрасываем ошибки
+        // Сбрасываем стили ошибок
         point.classList.remove('error');
         note.classList.remove('error');
         amount.classList.remove('error');
         
-        // Проверяем заполненность
+        // Проверяем заполненность полей
         if (!point.value || !note.value || !amount.value) {
             hasEmptyFields = true;
             allValid = false;
@@ -110,7 +159,10 @@ function validateConditions() {
     return allValid;
 }
 
-// Проверка загрузки библиотек PDF
+/**
+ * Проверяет загрузку библиотек PDF
+ * @returns {boolean} Библиотеки загружены
+ */
 function checkPDFMakeLoaded() {
     if (typeof pdfMake === 'undefined' || typeof pdfMake.vfs === 'undefined') {
         alert('Библиотеки для генерации PDF не загрузились. Пожалуйста, обновите страницу.');
@@ -119,17 +171,22 @@ function checkPDFMakeLoaded() {
     return true;
 }
 
-// Форматирование числового ввода
+/**
+ * Форматирует ввод суммы (разделение пробелами)
+ * @param {HTMLInputElement} input - Поле ввода суммы
+ */
 function formatNumberInput(input) {
     const cursorPosition = input.selectionStart;
     let value = input.value.replace(/[^0-9\s,.]/g, '');
     value = value.replace(/,/g, '.');
     
+    // Обработка нескольких точек
     if ((value.match(/\./g) || []).length > 1) {
         const lastDotPos = value.lastIndexOf('.');
         value = value.substring(0, lastDotPos).replace(/\./g, '') + value.substring(lastDotPos);
     }
     
+    // Форматирование целой части
     if (!value.includes('.')) {
         value = value.replace(/\s/g, '');
         if (value.length > 3) {
@@ -139,7 +196,7 @@ function formatNumberInput(input) {
     
     input.value = value;
     
-    // Восстанавливаем позицию курсора с учетом добавленных пробелов
+    // Восстановление позиции курсора
     const diff = input.value.length - value.length;
     if (cursorPosition > 0) {
         input.setSelectionRange(cursorPosition + diff, cursorPosition + diff);
@@ -159,8 +216,8 @@ document.addEventListener('DOMContentLoaded', function() {
         validateTextInput(this, 'middleName-error');
     });
 
-    // Валидация полей условий
-    document.addEventListener('input', function(e) {
+    // Валидация при потере фокуса для условий
+    document.addEventListener('focusout', function(e) {
         if (e.target.classList.contains('condition-point') || 
             e.target.classList.contains('condition-note') ||
             e.target.classList.contains('condition-amount')) {
